@@ -5,9 +5,8 @@
 
 // Get API URL from environment variable or use default
 export const getApiUrl = () => {
-  // In production, use VITE_API_URL from environment
-  // In development, fallback to localhost
-  return import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  // Use VITE_API_URL from environment, or fallback to deployed backend
+  return import.meta.env.VITE_API_URL || 'https://faculty2.onrender.com';
 };
 
 // Full API URL helper
