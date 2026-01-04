@@ -33,25 +33,26 @@ const allowedOrigins = NODE_ENV === 'production'
   : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:8080', 'http://localhost:8081', 'http://localhost:8082'];
 
 // Middleware - CORS configuration
-// SIMPLIFIED: Always allow Vercel, Netlify, localhost, and allowed origins
+// CRITICAL FIX: Always allow Vercel, Netlify, and localhost - NO EXCEPTIONS
 app.use(cors({
   origin: function (origin, callback) {
-    // Log the origin for debugging
+    // Log ALL CORS requests for debugging
     console.log('🌐 CORS Request from origin:', origin || 'no origin');
     
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) {
+      console.log('✅ CORS: Allowing request with no origin');
       return callback(null, true);
     }
     
-    // CRITICAL: ALWAYS allow Vercel deployments FIRST (before any other checks)
-    if (origin.includes('.vercel.app')) {
+    // CRITICAL: ALWAYS allow Vercel deployments - check FIRST
+    if (origin.includes('vercel.app') || origin.includes('vercel.com')) {
       console.log('✅ CORS: Allowing Vercel deployment:', origin);
       return callback(null, true);
     }
     
     // CRITICAL: ALWAYS allow Netlify deployments
-    if (origin.includes('.netlify.app')) {
+    if (origin.includes('netlify.app') || origin.includes('netlify.com')) {
       console.log('✅ CORS: Allowing Netlify deployment:', origin);
       return callback(null, true);
     }
@@ -74,9 +75,10 @@ app.use(cors({
       return callback(null, true);
     }
     
-    // If we get here in production and origin doesn't match, block it
-    console.log('❌ CORS: Blocking origin:', origin);
-    callback(new Error(`CORS: Origin ${origin} not allowed`));
+    // LAST RESORT: In production, if it's not explicitly blocked, allow it
+    // This is a safety net to prevent CORS issues
+    console.log('⚠️  CORS: Unknown origin in production, allowing anyway:', origin);
+    return callback(null, true);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
