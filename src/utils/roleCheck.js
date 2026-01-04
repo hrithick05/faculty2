@@ -51,14 +51,23 @@ export async function checkIsHeadOfDepartment(facultyId) {
       'department head'
     ];
     
-    const isHeadOfDepartment = hodDesignations.some(hod => 
-      designation === hod || 
-      designation.includes('head') && designation.includes('department') ||
-      designation.includes('professor') && designation.includes('head')
-    );
+    // First check exact matches
+    const exactMatch = hodDesignations.includes(designation);
+    
+    // Then check for partial matches
+    const hasHead = designation.includes('head');
+    const hasDepartment = designation.includes('department');
+    const hasProfessor = designation.includes('professor');
+    
+    // If it has "head" and ("department" or "professor"), it's HOD
+    const partialMatch = hasHead && (hasDepartment || hasProfessor);
+    
+    const isHeadOfDepartment = exactMatch || partialMatch;
     
     console.log('✅ Designation check result:', designation, 'isHeadOfDepartment:', isHeadOfDepartment);
     console.log('🔍 HOD designations checked:', hodDesignations);
+    console.log('  - Exact match:', exactMatch);
+    console.log('  - Partial match (head + department/professor):', partialMatch);
     console.log('  - Current designation:', `"${designation}"`);
     
     return isHeadOfDepartment;
