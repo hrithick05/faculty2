@@ -50,16 +50,23 @@ app.use(cors({
     
     if (allowedOrigins.includes(origin)) {
       console.log('✅ CORS allowed for origin:', origin);
-      callback(null, true);
-    } else {
-      console.log('❌ CORS blocked for origin:', origin);
-      console.log('📋 Allowed origins:', allowedOrigins);
-      callback(new Error('Not allowed by CORS'));
+      return callback(null, true);
     }
+    
+    // In development, allow all origins
+    if (NODE_ENV !== 'production') {
+      console.log('⚠️  Development mode: allowing origin:', origin);
+      return callback(null, true);
+    }
+    
+    console.log('❌ CORS blocked for origin:', origin);
+    console.log('📋 Allowed origins:', allowedOrigins);
+    callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json({ limit: '50mb' }));
 
