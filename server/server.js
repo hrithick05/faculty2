@@ -59,7 +59,16 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
 }));
 app.use(express.json({ limit: '50mb' }));
-app.use(express.static('public'));
+
+// Static file serving - only if public directory exists
+import { existsSync } from 'fs';
+import { join } from 'path';
+const publicPath = join(process.cwd(), 'public');
+if (existsSync(publicPath)) {
+  app.use(express.static('public'));
+} else {
+  console.log('⚠️  Public directory not found, skipping static file serving');
+}
 
 // CORS preflight requests are handled by the cors() middleware above
 // No need for explicit app.options('*', cors()) as it causes path-to-regexp errors
