@@ -25,6 +25,7 @@ app.use(cors({
     
     const allowedOrigins = NODE_ENV === 'production' 
       ? [
+          'https://faculty2.onrender.com', // Backend URL (for same-origin requests)
           'https://t-dashboard-frontend.onrender.com',
           'https://t-dashboard-ten.vercel.app',
           'https://your-frontend-domain.vercel.app',
@@ -37,17 +38,24 @@ app.use(cors({
         ]
       : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:8080', 'http://localhost:8081'];
     
+    // Always allow localhost origins (for local development connecting to deployed backend)
+    if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      console.log('✅ CORS allowed for localhost origin:', origin);
+      return callback(null, true);
+    }
+    
     if (allowedOrigins.includes(origin)) {
       console.log('✅ CORS allowed for origin:', origin);
       callback(null, true);
     } else {
       console.log('❌ CORS blocked for origin:', origin);
+      console.log('📋 Allowed origins:', allowedOrigins);
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
 }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.static('public'));
@@ -57,13 +65,22 @@ app.use(express.static('public'));
 
 // Additional CORS headers middleware
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
+  const origin = req.headers.origin;
   
-  // Log CORS headers being set
-  console.log('🔧 Setting CORS headers for request from:', req.headers.origin);
+  // Check if origin is in allowed list
+  const isAllowed = NODE_ENV === 'production'
+    ? allowedOrigins.includes(origin) || origin?.includes('localhost')
+    : true; // Allow all in development
+  
+  if (isAllowed || !origin) {
+    res.header('Access-Control-Allow-Origin', origin || '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    
+    // Log CORS headers being set
+    console.log('🔧 Setting CORS headers for request from:', origin || 'no origin');
+  }
   
   next();
 });

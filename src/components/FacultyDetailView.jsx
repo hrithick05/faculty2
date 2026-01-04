@@ -41,7 +41,7 @@ const FacultyDetailView = () => {
       console.log('🔄 Refreshing achievement counts for faculty:', faculty.id);
       
       // Fetch latest faculty data from database
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://faculty2.onrender.com';
       const response = await fetch(`${apiUrl}/api/faculty/${faculty.id}`);
       
       if (!response.ok) {
@@ -221,10 +221,16 @@ const FacultyDetailView = () => {
       });
       
       // Upload to backend
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://faculty2.onrender.com';
+      console.log('🌐 Uploading to:', `${apiUrl}/api/achievements/submit`);
       const response = await fetch(`${apiUrl}/api/achievements/submit`, {
         method: 'POST',
-        body: formData
+        body: formData,
+        // Don't set Content-Type header - browser will set it automatically with boundary for FormData
+        headers: {
+          // Explicitly allow CORS
+          'Accept': 'application/json',
+        }
       });
       
       if (!response.ok) {
@@ -272,9 +278,21 @@ const FacultyDetailView = () => {
 
     } catch (error) {
       console.error('❌ PDF upload error:', error);
+      console.error('❌ Error details:', {
+        message: error.message,
+        stack: error.stack,
+        apiUrl: import.meta.env.VITE_API_URL || 'https://faculty2.onrender.com'
+      });
+      
+      // Provide more helpful error message
+      let errorMessage = error.message;
+      if (error.message === 'Failed to fetch' || error.message.includes('fetch')) {
+        errorMessage = 'Cannot connect to backend server. Please check your internet connection and ensure the backend is running.';
+      }
+      
       toast({
         title: "Upload Failed",
-        description: `Failed to upload PDF: ${error.message}`,
+        description: `Failed to upload PDF: ${errorMessage}`,
         variant: "destructive"
       });
     } finally {

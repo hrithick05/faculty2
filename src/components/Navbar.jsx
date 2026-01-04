@@ -53,7 +53,7 @@ const Navbar = () => {
 
     setIsLoading(true);
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://faculty2.onrender.com';
       const response = await fetch(`${apiUrl}/api/faculty/change-faculty-id`, {
         method: 'POST',
         headers: {

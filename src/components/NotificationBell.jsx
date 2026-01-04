@@ -22,7 +22,7 @@ const NotificationBell = () => {
     if (!facultyId) return;
     
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://faculty2.onrender.com';
       const response = await fetch(`${apiUrl}/api/notifications/${facultyId}/unread-count`);
       
       if (response.ok) {
@@ -42,7 +42,7 @@ const NotificationBell = () => {
     
     setLoading(true);
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://faculty2.onrender.com';
       const response = await fetch(`${apiUrl}/api/notifications/${facultyId}`);
       
       if (response.ok) {
@@ -66,7 +66,7 @@ const NotificationBell = () => {
   // Mark notification as read
   const markAsRead = async (notificationId) => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://faculty2.onrender.com';
       const response = await fetch(`${apiUrl}/api/notifications/${notificationId}/read`, {
         method: 'PUT'
       });
@@ -90,7 +90,7 @@ const NotificationBell = () => {
   // Mark all as read
   const markAllAsRead = async () => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://faculty2.onrender.com';
       const response = await fetch(`${apiUrl}/api/notifications/${facultyId}/read-all`, {
         method: 'PUT'
       });
@@ -118,7 +118,7 @@ const NotificationBell = () => {
   // Delete notification
   const deleteNotification = async (notificationId) => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://faculty2.onrender.com';
       const response = await fetch(`${apiUrl}/api/notifications/${notificationId}`, {
         method: 'DELETE'
       });

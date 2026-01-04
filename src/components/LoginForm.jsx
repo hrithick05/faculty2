@@ -106,19 +106,43 @@ const LoginForm = () => {
               .trim();
           };
           
-          // Also check if names are similar (fuzzy match for common typos)
+          // Check if names are similar (fuzzy match for common typos and spelling variations)
           const namesSimilar = (name1, name2) => {
             const norm1 = normalizeName(name1);
             const norm2 = normalizeName(name2);
+            
             // Exact match
             if (norm1 === norm2) return true;
+            
+            // Remove common variations (double letters, etc.) for comparison
+            const removeDoubleLetters = (str) => {
+              // Replace double letters with single (e.g., "chakkaravarthy" -> "chakaravarthy")
+              return str.replace(/([a-z])\1+/g, '$1');
+            };
+            
+            const simplified1 = removeDoubleLetters(norm1);
+            const simplified2 = removeDoubleLetters(norm2);
+            
+            // Check if simplified versions match
+            if (simplified1 === simplified2) return true;
+            
             // Check if one contains the other (for partial matches)
-            if (norm1.includes(norm2) || norm2.includes(norm1)) {
-              // Extract last name part (usually more unique)
-              const lastPart1 = norm1.split(' ').slice(-2).join(' ');
-              const lastPart2 = norm2.split(' ').slice(-2).join(' ');
-              return lastPart1 === lastPart2;
+            if (simplified1.includes(simplified2) || simplified2.includes(simplified1)) {
+              // Extract last name part (usually more unique) - last 2 words
+              const lastPart1 = simplified1.split(' ').slice(-2).join(' ');
+              const lastPart2 = simplified2.split(' ').slice(-2).join(' ');
+              // Check if last parts match (after removing double letters)
+              if (lastPart1 === lastPart2) return true;
             }
+            
+            // Final check: compare key parts (first name + last name)
+            const parts1 = simplified1.split(' ').filter(p => p.length > 2);
+            const parts2 = simplified2.split(' ').filter(p => p.length > 2);
+            
+            // If we have at least 2 matching parts, consider it a match
+            const matchingParts = parts1.filter(p => parts2.includes(p));
+            if (matchingParts.length >= 2) return true;
+            
             return false;
           };
           

@@ -139,7 +139,7 @@ const HODReviewPanel = () => {
       }
       
       console.log('🔍 Fetching submissions from backend...');
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://faculty2.onrender.com';
       const response = await fetch(`${apiUrl}/api/achievements/all`);
       
       if (!response.ok) {
@@ -377,7 +377,7 @@ const HODReviewPanel = () => {
     try {
       console.log('🔍 Reviewing submission:', submissionId, 'Action:', action);
       
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://faculty2.onrender.com';
       const response = await fetch(`${apiUrl}/api/achievements/review`, {
         method: 'POST',
         headers: {
@@ -456,7 +456,7 @@ const HODReviewPanel = () => {
     }
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://faculty2.onrender.com';
       const response = await fetch(`${apiUrl}/api/faculty/delete-details`, {
         method: 'DELETE',
         headers: {
