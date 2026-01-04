@@ -172,8 +172,9 @@ app.get('/api/test-code-version', (req, res) => {
 app.post('/api/achievements/submit', upload.single('pdf'), async (req, res) => {
   try {
     console.log('📤 PDF upload request received');
+    console.log('📁 Request origin:', req.headers.origin);
     console.log('📁 Request body:', req.body);
-    console.log('📁 Request file:', req.file);
+    console.log('📁 Request file:', req.file ? { name: req.file.originalname, size: req.file.size } : 'No file');
     
     if (!req.file) {
       console.log('❌ No PDF file in request');
