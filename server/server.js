@@ -31,56 +31,57 @@ const allowedOrigins = NODE_ENV === 'production'
     ]
   : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:8080', 'http://localhost:8081', 'http://localhost:8082'];
 
-// Middleware
+// Middleware - CORS configuration
+// SIMPLIFIED: Always allow Vercel, Netlify, localhost, and allowed origins
 app.use(cors({
   origin: function (origin, callback) {
     // Log the origin for debugging
-    console.log('🌐 CORS Request from origin:', origin);
+    console.log('🌐 CORS Request from origin:', origin || 'no origin');
     
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) {
-      console.log('✅ Allowing request with no origin');
       return callback(null, true);
     }
     
-    // Always allow localhost origins (for local development connecting to deployed backend)
-    if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
-      console.log('✅ CORS allowed for localhost origin:', origin);
-      return callback(null, true);
-    }
-    
-    // ALWAYS allow Vercel deployments (vercel.app domains) - regardless of environment
+    // CRITICAL: ALWAYS allow Vercel deployments FIRST (before any other checks)
     if (origin.includes('.vercel.app')) {
-      console.log('✅ CORS allowed for Vercel deployment:', origin);
+      console.log('✅ CORS: Allowing Vercel deployment:', origin);
       return callback(null, true);
     }
     
-    // ALWAYS allow Netlify deployments (netlify.app domains) - regardless of environment
+    // CRITICAL: ALWAYS allow Netlify deployments
     if (origin.includes('.netlify.app')) {
-      console.log('✅ CORS allowed for Netlify deployment:', origin);
+      console.log('✅ CORS: Allowing Netlify deployment:', origin);
+      return callback(null, true);
+    }
+    
+    // Always allow localhost origins
+    if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      console.log('✅ CORS: Allowing localhost:', origin);
       return callback(null, true);
     }
     
     // Check allowed origins list
     if (allowedOrigins.includes(origin)) {
-      console.log('✅ CORS allowed for origin:', origin);
+      console.log('✅ CORS: Allowing from allowed list:', origin);
       return callback(null, true);
     }
     
-    // In development, allow all origins
+    // In development mode, allow all origins
     if (NODE_ENV !== 'production') {
-      console.log('⚠️  Development mode: allowing origin:', origin);
+      console.log('✅ CORS: Development mode - allowing:', origin);
       return callback(null, true);
     }
     
-    console.log('❌ CORS blocked for origin:', origin);
-    console.log('📋 Allowed origins:', allowedOrigins);
-    callback(new Error('Not allowed by CORS'));
+    // If we get here in production and origin doesn't match, block it
+    console.log('❌ CORS: Blocking origin:', origin);
+    callback(new Error(`CORS: Origin ${origin} not allowed`));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-  exposedHeaders: ['Content-Type', 'Authorization']
+  exposedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 200 // Some legacy browsers (IE11) choke on 204
 }));
 app.use(express.json({ limit: '50mb' }));
 
