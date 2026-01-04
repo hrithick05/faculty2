@@ -24,10 +24,11 @@ const allowedOrigins = NODE_ENV === 'production'
       'https://your-frontend-domain.com',
       'http://localhost:8080',
       'http://localhost:8081',
+      'http://localhost:8082',
       'http://localhost:3000',
       'http://localhost:5173'
     ]
-  : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:8080', 'http://localhost:8081'];
+  : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:8080', 'http://localhost:8081', 'http://localhost:8082'];
 
 // Middleware
 app.use(cors({
