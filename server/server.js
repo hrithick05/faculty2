@@ -63,28 +63,7 @@ app.use(express.static('public'));
 
 // CORS preflight requests are handled by the cors() middleware above
 // No need for explicit app.options('*', cors()) as it causes path-to-regexp errors
-
-// Additional CORS headers middleware
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  
-  // Check if origin is in allowed list
-  const isAllowed = NODE_ENV === 'production'
-    ? allowedOrigins.includes(origin) || origin?.includes('localhost')
-    : true; // Allow all in development
-  
-  if (isAllowed || !origin) {
-    res.header('Access-Control-Allow-Origin', origin || '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    
-    // Log CORS headers being set
-    console.log('🔧 Setting CORS headers for request from:', origin || 'no origin');
-  }
-  
-  next();
-});
+// No need for additional CORS headers middleware - cors() already handles all CORS headers
 
 // Supabase configuration
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
