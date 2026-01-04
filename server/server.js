@@ -3,6 +3,8 @@ import cors from 'cors';
 import { createClient } from '@supabase/supabase-js';
 import multer from 'multer';
 import dotenv from 'dotenv';
+import { existsSync } from 'fs';
+import { join } from 'path';
 
 // Load environment variables
 dotenv.config();
@@ -61,8 +63,6 @@ app.use(cors({
 app.use(express.json({ limit: '50mb' }));
 
 // Static file serving - only if public directory exists
-import { existsSync } from 'fs';
-import { join } from 'path';
 const publicPath = join(process.cwd(), 'public');
 if (existsSync(publicPath)) {
   app.use(express.static('public'));
