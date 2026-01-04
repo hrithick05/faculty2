@@ -49,20 +49,21 @@ app.use(cors({
       return callback(null, true);
     }
     
-    if (allowedOrigins.includes(origin)) {
-      console.log('✅ CORS allowed for origin:', origin);
-      return callback(null, true);
-    }
-    
-    // Allow all Vercel deployments (vercel.app domains)
+    // ALWAYS allow Vercel deployments (vercel.app domains) - regardless of environment
     if (origin.includes('.vercel.app')) {
       console.log('✅ CORS allowed for Vercel deployment:', origin);
       return callback(null, true);
     }
     
-    // Allow all Netlify deployments (netlify.app domains)
+    // ALWAYS allow Netlify deployments (netlify.app domains) - regardless of environment
     if (origin.includes('.netlify.app')) {
       console.log('✅ CORS allowed for Netlify deployment:', origin);
+      return callback(null, true);
+    }
+    
+    // Check allowed origins list
+    if (allowedOrigins.includes(origin)) {
+      console.log('✅ CORS allowed for origin:', origin);
       return callback(null, true);
     }
     
