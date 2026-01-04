@@ -1,0 +1,25 @@
+# Copy this content to create your .env file
+# Rename this file to .env (remove .txt extension)
+
+# ============================================
+# SUPABASE CONFIGURATION (REQUIRED)
+# ============================================
+# Get these from: Supabase Dashboard → Settings → API
+
+VITE_SUPABASE_URL=your_supabase_project_url_here
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+VITE_SUPABASE_SERVICE_KEY=your_supabase_service_role_key_here
+
+# ============================================
+# BACKEND SERVER CONFIGURATION (OPTIONAL)
+# ============================================
+
+PORT=5000
+NODE_ENV=development
+
+# ============================================
+# OPTIONAL: FRONTEND API URL
+# ============================================
+# Uncomment if backend is deployed separately
+# VITE_API_URL=http://localhost:5000
+
