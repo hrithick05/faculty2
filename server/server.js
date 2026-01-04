@@ -33,58 +33,14 @@ const allowedOrigins = NODE_ENV === 'production'
   : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:8080', 'http://localhost:8081', 'http://localhost:8082'];
 
 // Middleware - CORS configuration
-// CRITICAL FIX: Always allow Vercel, Netlify, and localhost - NO EXCEPTIONS
+// SIMPLIFIED: Allow ALL origins - no restrictions
 app.use(cors({
-  origin: function (origin, callback) {
-    // Log ALL CORS requests for debugging
-    console.log('🌐 CORS Request from origin:', origin || 'no origin');
-    
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) {
-      console.log('✅ CORS: Allowing request with no origin');
-      return callback(null, true);
-    }
-    
-    // CRITICAL: ALWAYS allow Vercel deployments - check FIRST
-    if (origin.includes('vercel.app') || origin.includes('vercel.com')) {
-      console.log('✅ CORS: Allowing Vercel deployment:', origin);
-      return callback(null, true);
-    }
-    
-    // CRITICAL: ALWAYS allow Netlify deployments
-    if (origin.includes('netlify.app') || origin.includes('netlify.com')) {
-      console.log('✅ CORS: Allowing Netlify deployment:', origin);
-      return callback(null, true);
-    }
-    
-    // Always allow localhost origins
-    if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
-      console.log('✅ CORS: Allowing localhost:', origin);
-      return callback(null, true);
-    }
-    
-    // Check allowed origins list
-    if (allowedOrigins.includes(origin)) {
-      console.log('✅ CORS: Allowing from allowed list:', origin);
-      return callback(null, true);
-    }
-    
-    // In development mode, allow all origins
-    if (NODE_ENV !== 'production') {
-      console.log('✅ CORS: Development mode - allowing:', origin);
-      return callback(null, true);
-    }
-    
-    // LAST RESORT: In production, if it's not explicitly blocked, allow it
-    // This is a safety net to prevent CORS issues
-    console.log('⚠️  CORS: Unknown origin in production, allowing anyway:', origin);
-    return callback(null, true);
-  },
+  origin: true, // Allow all origins
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   exposedHeaders: ['Content-Type', 'Authorization'],
-  optionsSuccessStatus: 200 // Some legacy browsers (IE11) choke on 204
+  optionsSuccessStatus: 200
 }));
 app.use(express.json({ limit: '50mb' }));
 
