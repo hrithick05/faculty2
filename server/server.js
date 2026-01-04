@@ -11,6 +11,22 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
+// CORS allowed origins - defined outside middleware for reuse
+const allowedOrigins = NODE_ENV === 'production' 
+  ? [
+      'https://faculty2.onrender.com', // Backend URL (for same-origin requests)
+      'https://t-dashboard-frontend.onrender.com',
+      'https://t-dashboard-ten.vercel.app',
+      'https://your-frontend-domain.vercel.app',
+      'https://your-frontend-domain.netlify.app',
+      'https://your-frontend-domain.com',
+      'http://localhost:8080',
+      'http://localhost:8081',
+      'http://localhost:3000',
+      'http://localhost:5173'
+    ]
+  : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:8080', 'http://localhost:8081'];
+
 // Middleware
 app.use(cors({
   origin: function (origin, callback) {
@@ -22,21 +38,6 @@ app.use(cors({
       console.log('✅ Allowing request with no origin');
       return callback(null, true);
     }
-    
-    const allowedOrigins = NODE_ENV === 'production' 
-      ? [
-          'https://faculty2.onrender.com', // Backend URL (for same-origin requests)
-          'https://t-dashboard-frontend.onrender.com',
-          'https://t-dashboard-ten.vercel.app',
-          'https://your-frontend-domain.vercel.app',
-          'https://your-frontend-domain.netlify.app',
-          'https://your-frontend-domain.com',
-          'http://localhost:8080',
-          'http://localhost:8081',
-          'http://localhost:3000',
-          'http://localhost:5173'
-        ]
-      : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:8080', 'http://localhost:8081'];
     
     // Always allow localhost origins (for local development connecting to deployed backend)
     if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
