@@ -234,8 +234,17 @@ const FacultyDetailView = () => {
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Upload failed');
+        // Try to parse error as JSON, but handle HTML responses
+        let errorData;
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          errorData = await response.json();
+        } else {
+          const text = await response.text();
+          console.error('❌ Backend returned non-JSON error:', text.substring(0, 200));
+          throw new Error(`Server error (${response.status}): ${response.statusText}`);
+        }
+        throw new Error(errorData.message || errorData.error || 'Upload failed');
       }
       
       const result = await response.json();
@@ -286,8 +295,10 @@ const FacultyDetailView = () => {
       
       // Provide more helpful error message
       let errorMessage = error.message;
-      if (error.message === 'Failed to fetch' || error.message.includes('fetch')) {
-        errorMessage = 'Cannot connect to backend server. Please check your internet connection and ensure the backend is running.';
+      if (error.message === 'Failed to fetch' || error.message.includes('fetch') || error.message.includes('network')) {
+        errorMessage = 'Cannot connect to backend server. The server may be starting up (this can take up to 30 seconds on free tier). Please wait a moment and try again.';
+      } else if (error.message.includes('JSON') || error.message.includes('DOCTYPE')) {
+        errorMessage = 'Server error: The backend returned an invalid response. Please try again or contact support.';
       }
       
       toast({
