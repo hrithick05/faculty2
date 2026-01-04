@@ -340,11 +340,17 @@ app.post('/api/achievements/submit', upload.single('pdf'), async (req, res) => {
     
   } catch (error) {
     console.error('❌ Error in PDF upload:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: error.message || 'PDF upload failed',
-      error: error.message
-    });
+    console.error('❌ Error stack:', error.stack);
+    
+    // Ensure we always return JSON, not HTML
+    if (!res.headersSent) {
+      res.status(500).json({ 
+        success: false, 
+        message: error.message || 'PDF upload failed',
+        error: error.message,
+        stack: NODE_ENV === 'development' ? error.stack : undefined
+      });
+    }
   }
 });
 
@@ -1936,6 +1942,40 @@ app.post('/api/faculty/delete-details', async (req, res) => {
     res.status(500).json({ 
       success: false, 
       message: error.message || 'Failed to delete faculty details' 
+    });
+  }
+});
+
+// Error handling middleware - must be after all routes
+app.use((err, req, res, next) => {
+  console.error('❌ Unhandled error:', err);
+  console.error('❌ Error stack:', err.stack);
+  
+  // Always return JSON, never HTML
+  if (!res.headersSent) {
+    res.status(err.status || 500).json({
+      success: false,
+      message: err.message || 'Internal server error',
+      error: err.message,
+      stack: NODE_ENV === 'development' ? err.stack : undefined
+    });
+  }
+});
+
+// 404 handler - must be after all routes
+app.use((req, res) => {
+  // Always return JSON for API routes, even 404s
+  if (req.path.startsWith('/api')) {
+    res.status(404).json({
+      success: false,
+      message: `API endpoint not found: ${req.method} ${req.path}`,
+      path: req.path
+    });
+  } else {
+    // For non-API routes, return JSON as well
+    res.status(404).json({
+      success: false,
+      message: 'Route not found'
     });
   }
 });
