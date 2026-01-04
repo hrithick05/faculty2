@@ -42,25 +42,26 @@ export async function checkIsHeadOfDepartment(facultyId) {
     const designation = data.designation?.toLowerCase().trim() || '';
     console.log('🔍 Checking designation:', designation);
     
-    // Check for HOD designations - including variations
+    // Check for HOD designations - STRICT: Only allow specific HOD designations
     const hodDesignations = [
       'head of department',
       'hod',
       'professor and head',
-      'head',
       'department head'
     ];
     
     // First check exact matches
     const exactMatch = hodDesignations.includes(designation);
     
-    // Then check for partial matches
+    // STRICT: Only allow if it has "head" AND ("department" OR "professor")
+    // This ensures only actual HOD roles match, not just any professor
     const hasHead = designation.includes('head');
     const hasDepartment = designation.includes('department');
     const hasProfessor = designation.includes('professor');
     
-    // If it has "head" and ("department" or "professor"), it's HOD
-    const partialMatch = hasHead && (hasDepartment || hasProfessor);
+    // Must have BOTH "head" AND ("department" OR "professor")
+    // This ensures "Professor and Head" matches, but regular "Professor" doesn't
+    const partialMatch = hasHead && (hasDepartment || (hasProfessor && designation.includes('and')));
     
     const isHeadOfDepartment = exactMatch || partialMatch;
     

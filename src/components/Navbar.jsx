@@ -100,14 +100,27 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
-            {/* HOD Review Button - Only show for HODs */}
+            {/* HOD Review Button - Only show for HODs (strict check) */}
             {(() => {
-              const designation = loggedInFaculty?.designation?.toLowerCase() || '';
-              const isHOD = designation.includes('hod') || 
-                           designation.includes('head') || 
-                           designation.includes('chair') ||
-                           designation.includes('professor') ||
-                           designation.includes('director');
+              const designation = (loggedInFaculty?.designation || '').toLowerCase().trim();
+              
+              // STRICT: Only allow specific HOD designations
+              const hodDesignations = [
+                'head of department',
+                'hod',
+                'professor and head',
+                'department head'
+              ];
+              
+              const exactMatch = hodDesignations.includes(designation);
+              const hasHead = designation.includes('head');
+              const hasDepartment = designation.includes('department');
+              const hasProfessor = designation.includes('professor');
+              
+              // Only match if it has "head" AND ("department" OR "professor")
+              const partialMatch = hasHead && (hasDepartment || (hasProfessor && designation.includes('and')));
+              
+              const isHOD = exactMatch || partialMatch;
               return isHOD;
             })() && (
               <Button 
@@ -203,14 +216,27 @@ const Navbar = () => {
       {isMobileMenuOpen && (
         <div className={`md:hidden ${theme === 'dark' ? 'bg-gray-900 border-t border-gray-700' : 'bg-white border-t border-gray-200'}`}>
           <div className="px-4 py-6 space-y-4">
-            {/* HOD Review Button - Only show for HODs */}
+            {/* HOD Review Button - Only show for HODs (strict check) */}
             {(() => {
-              const designation = loggedInFaculty?.designation?.toLowerCase() || '';
-              const isHOD = designation.includes('hod') || 
-                           designation.includes('head') || 
-                           designation.includes('chair') ||
-                           designation.includes('professor') ||
-                           designation.includes('director');
+              const designation = (loggedInFaculty?.designation || '').toLowerCase().trim();
+              
+              // STRICT: Only allow specific HOD designations
+              const hodDesignations = [
+                'head of department',
+                'hod',
+                'professor and head',
+                'department head'
+              ];
+              
+              const exactMatch = hodDesignations.includes(designation);
+              const hasHead = designation.includes('head');
+              const hasDepartment = designation.includes('department');
+              const hasProfessor = designation.includes('professor');
+              
+              // Only match if it has "head" AND ("department" OR "professor")
+              const partialMatch = hasHead && (hasDepartment || (hasProfessor && designation.includes('and')));
+              
+              const isHOD = exactMatch || partialMatch;
               return isHOD;
             })() && (
               <Button 
