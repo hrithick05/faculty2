@@ -17,7 +17,8 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 const allowedOrigins = NODE_ENV === 'production' 
   ? [
       'https://faculty2.onrender.com', // Backend URL (for same-origin requests)
-      'https://faculty2-ui8l.vercel.app', // Deployed Vercel frontend
+      'https://faculty2.vercel.app', // Production Vercel frontend
+      'https://faculty2-ui8l.vercel.app', // Preview Vercel frontend
       'https://t-dashboard-frontend.onrender.com',
       'https://t-dashboard-ten.vercel.app',
       'https://your-frontend-domain.vercel.app',
