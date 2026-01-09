@@ -61,7 +61,8 @@ const HODReviewPanel = () => {
     innovative_lab_conduct: 0,
     qp_setting_blooms: 0,
     nba_contribution: 0,
-    placement_contribution: 0
+    placement_contribution: 0,
+    loss_of_pay: 0
   });
   const [awardingPoints, setAwardingPoints] = useState(false);
   const { toast } = useToast();
@@ -1321,6 +1322,20 @@ const HODReviewPanel = () => {
                   min="0"
                   value={microLevelPoints.placement_contribution || 0}
                   onChange={(e) => setMicroLevelPoints({ ...microLevelPoints, placement_contribution: parseInt(e.target.value) || 0 })}
+                  placeholder="Enter points"
+                />
+              </div>
+
+              {/* Loss of Pay */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium">
+                  Loss of Pay
+                </label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={microLevelPoints.loss_of_pay || 0}
+                  onChange={(e) => setMicroLevelPoints({ ...microLevelPoints, loss_of_pay: parseInt(e.target.value) || 0 })}
                   placeholder="Enter points"
                 />
               </div>

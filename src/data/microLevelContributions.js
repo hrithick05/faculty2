@@ -71,6 +71,11 @@ export const microLevelContributions = [
         key: 'placement_contribution',
         label: 'Placement Contribution',
         description: 'Support for student placement activities'
+    },
+    {
+        key: 'loss_of_pay',
+        label: 'Loss of Pay',
+        description: 'Deductions for loss of pay'
     }
 ];
 

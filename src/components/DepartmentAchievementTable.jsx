@@ -174,6 +174,7 @@ const DepartmentAchievementTable = ({
                                     <TableHead className="font-semibold text-center dark:text-white min-w-[220px]">QP Setting (Blooms)</TableHead>
                                     <TableHead className="font-semibold text-center dark:text-white min-w-[160px]">NBA Contribution</TableHead>
                                     <TableHead className="font-semibold text-center dark:text-white min-w-[180px]">Placement Contribution</TableHead>
+                                    <TableHead className="font-semibold text-center dark:text-white min-w-[120px]">Loss of Pay</TableHead>
                                     <TableHead className="font-semibold text-center dark:text-white min-w-[120px]">Total Score</TableHead>
 
                                 </TableRow>
@@ -217,6 +218,7 @@ const DepartmentAchievementTable = ({
                                         <TableCell className="text-center dark:text-white">{faculty.qp_setting_blooms || 0}</TableCell>
                                         <TableCell className="text-center dark:text-white">{faculty.nba_contribution || 0}</TableCell>
                                         <TableCell className="text-center dark:text-white">{faculty.placement_contribution || 0}</TableCell>
+                                        <TableCell className="text-center dark:text-white">{faculty.loss_of_pay || 0}</TableCell>
                                         <TableCell className="text-center font-bold text-blue-700 dark:text-blue-400">
                                             {calculateMicroLevelTotal(faculty)}
                                         </TableCell>

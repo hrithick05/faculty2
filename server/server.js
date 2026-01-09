@@ -143,7 +143,7 @@ app.get('/api/test-code-version', (req, res) => {
       approval: ['approved_at', 'approved_by'],
       rejection: ['rejected_at', 'rejected_by', 'rejection_reason'],
       notes: ['notes'],
-      tracking: ['actual_increase_applied']
+      tracking: ['actual_increase_applied', 'loss_of_pay']
     },
     note: 'This endpoint confirms the server is running updated code'
   });
