@@ -14,12 +14,12 @@ import { getCookie, setCookie, deleteCookie } from '../utils/cookies';
 const FacultyDetailView = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   // Load faculty data from localStorage or cookies
   const localFaculty = localStorage.getItem('loggedInFaculty');
   const cookieFaculty = getCookie('loggedInFaculty');
   const faculty = localFaculty ? JSON.parse(localFaculty) : cookieFaculty;
-  
+
   const [editedFaculty, setEditedFaculty] = useState(faculty);
   const [isEditing, setIsEditing] = useState(false);
   const [pdfSubmissions, setPdfSubmissions] = useState({});
@@ -39,29 +39,29 @@ const FacultyDetailView = () => {
     try {
       setIsRefreshing(true);
       console.log('🔄 Refreshing achievement counts for faculty:', faculty.id);
-      
+
       // Fetch latest faculty data from database
       const apiUrl = import.meta.env.VITE_API_URL || 'https://faculty2.onrender.com';
       const response = await fetch(`${apiUrl}/api/faculty/${faculty.id}`);
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch updated faculty data');
       }
-      
+
       const result = await response.json();
-      
+
       if (result.success && result.data) {
         const updatedFaculty = result.data;
         console.log('✅ Updated faculty data:', updatedFaculty);
-        
+
         // Update both the main faculty object and editedFaculty
         Object.assign(faculty, updatedFaculty);
         setEditedFaculty({ ...updatedFaculty });
-        
+
         // Update localStorage and cookies
         localStorage.setItem('loggedInFaculty', JSON.stringify(updatedFaculty));
         setCookie('loggedInFaculty', updatedFaculty, 7);
-        
+
         toast({
           title: "Achievement Counts Updated! 🎉",
           description: "Latest achievement counts have been refreshed from the database.",
@@ -94,21 +94,21 @@ const FacultyDetailView = () => {
 
   const handleSave = () => {
     console.log('💾 Saving faculty achievements:', editedFaculty);
-    
+
     // Update both localStorage and cookies
     localStorage.setItem('loggedInFaculty', JSON.stringify(editedFaculty));
     setCookie('loggedInFaculty', editedFaculty, 7);
-    
+
     // Update the main faculty object to reflect changes immediately
     // This ensures the UI shows the updated values
     Object.assign(faculty, editedFaculty);
-    
+
     setIsEditing(false);
     toast({
       title: "Success",
       description: "Your achievements have been updated successfully!",
     });
-    
+
     console.log('✅ Faculty achievements saved successfully');
   };
 
@@ -119,12 +119,12 @@ const FacultyDetailView = () => {
     deleteCookie('loginTimestamp');
     deleteCookie('sessionInfo');
     deleteCookie('lastActivity');
-    
+
     toast({
       title: "Logged Out",
       description: "You have been successfully logged out.",
     });
-    
+
     navigate('/login');
   };
 
@@ -194,10 +194,10 @@ const FacultyDetailView = () => {
       // Get the title and description from the state
       const title = submissionTitles[`${categoryKey}_${fieldKey}`] || 'Untitled Achievement';
       const description = submissionDescriptions[`${categoryKey}_${fieldKey}`] || 'No description provided';
-      
+
       // Set uploading state
       setIsUploading(true);
-      
+
       // Create FormData for file upload
       const formData = new FormData();
       formData.append('pdf', submission.file);
@@ -209,8 +209,8 @@ const FacultyDetailView = () => {
       formData.append('title', title);
       formData.append('description', description);
       formData.append('currentCount', faculty[fieldKey] || 0);
-      formData.append('requestedIncrease', '1');
-      
+      formData.append('requestedIncrease', editedFaculty[`${fieldKey}_increase`] || '1');
+
       console.log('📤 Uploading PDF to backend:', {
         facultyId: faculty.id,
         facultyName: faculty.name,
@@ -219,7 +219,7 @@ const FacultyDetailView = () => {
         title: title,
         fileName: submission.name
       });
-      
+
       // Upload to backend
       const apiUrl = import.meta.env.VITE_API_URL || 'https://faculty2.onrender.com';
       console.log('🌐 Uploading to:', `${apiUrl}/api/achievements/submit`);
@@ -232,7 +232,7 @@ const FacultyDetailView = () => {
           'Accept': 'application/json',
         }
       });
-      
+
       if (!response.ok) {
         // Try to parse error as JSON, but handle HTML responses
         let errorData;
@@ -246,41 +246,41 @@ const FacultyDetailView = () => {
         }
         throw new Error(errorData.message || errorData.error || 'Upload failed');
       }
-      
+
       const result = await response.json();
-      
+
       if (result.success) {
         toast({
           title: "PDF Uploaded Successfully! 🎉",
           description: `${submission.name} has been submitted for HOD review. Achievement count will increase after approval.`,
         });
-        
+
         // Clear the submission after successful upload
         setPdfSubmissions(prev => {
           const newState = { ...prev };
           delete newState[`${categoryKey}_${fieldKey}`];
           return newState;
         });
-        
+
         // Clear the form inputs
         setSubmissionTitles(prev => {
           const newState = { ...prev };
           delete newState[`${categoryKey}_${fieldKey}`];
           return newState;
         });
-        
+
         setSubmissionDescriptions(prev => {
           const newState = { ...prev };
           delete newState[`${categoryKey}_${fieldKey}`];
           return newState;
         });
-        
+
         // Automatically refresh achievement counts after successful upload
         // This ensures the UI shows the latest counts from the database
         setTimeout(() => {
           refreshAchievementCounts();
         }, 1000); // Wait 1 second for the backend to process
-        
+
       } else {
         throw new Error(result.message || 'Upload failed');
       }
@@ -292,7 +292,7 @@ const FacultyDetailView = () => {
         stack: error.stack,
         apiUrl: import.meta.env.VITE_API_URL || 'https://faculty2.onrender.com'
       });
-      
+
       // Provide more helpful error message
       let errorMessage = error.message;
       if (error.message === 'Failed to fetch' || error.message.includes('fetch') || error.message.includes('network')) {
@@ -300,7 +300,7 @@ const FacultyDetailView = () => {
       } else if (error.message.includes('JSON') || error.message.includes('DOCTYPE')) {
         errorMessage = 'Server error: The backend returned an invalid response. Please try again or contact support.';
       }
-      
+
       toast({
         title: "Upload Failed",
         description: `Failed to upload PDF: ${errorMessage}`,
@@ -435,18 +435,18 @@ const FacultyDetailView = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="flex gap-2">
-              <Button 
-                variant="secondary" 
+              <Button
+                variant="secondary"
                 onClick={() => isEditing ? handleCancel() : startEditing()}
                 className="bg-white/20 border-white/30 text-white hover:bg-white/30 shadow-lg transform hover:scale-105 transition-all duration-200"
               >
                 <Edit className="w-4 h-4 mr-2" />
                 {isEditing ? 'Cancel Edit' : 'Edit Achievements'}
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={refreshAchievementCounts}
                 disabled={isRefreshing}
                 className="bg-white/20 border-white/30 text-white hover:bg-white/30 shadow-lg transform hover:scale-105 transition-all duration-200"
@@ -454,15 +454,15 @@ const FacultyDetailView = () => {
                 <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
                 {isRefreshing ? 'Refreshing...' : 'Refresh Counts'}
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => navigate('/dashboard')}
                 className="bg-white/20 border-white/30 text-white hover:bg-white/30 shadow-lg transform hover:scale-105 transition-all duration-200"
               >
                 Back
               </Button>
-              <Button 
-                variant="destructive" 
+              <Button
+                variant="destructive"
                 onClick={handleLogout}
                 className="bg-red-600 hover:bg-red-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200"
               >
@@ -471,7 +471,7 @@ const FacultyDetailView = () => {
               </Button>
             </div>
           </div>
-          
+
           <div className="flex gap-4 mt-4">
             <div className="text-center">
               <div className="text-3xl font-bold text-yellow-300">{totalAchievements}</div>
@@ -493,8 +493,8 @@ const FacultyDetailView = () => {
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <h3 className="text-lg font-semibold text-blue-800 mb-2">📝 Changes Summary</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                {achievementCategories.flatMap(category => 
-                  category.items.filter(item => 
+                {achievementCategories.flatMap(category =>
+                  category.items.filter(item =>
                     editedFaculty[item.key] !== faculty[item.key]
                   ).map(item => (
                     <div key={item.key} className="flex justify-between items-center bg-white p-2 rounded border">
@@ -506,13 +506,13 @@ const FacultyDetailView = () => {
                   ))
                 )}
               </div>
-              {achievementCategories.flatMap(category => 
+              {achievementCategories.flatMap(category =>
                 category.items.filter(item => editedFaculty[item.key] !== faculty[item.key])
               ).length === 0 && (
-                <p className="text-blue-600 text-center">No changes made yet</p>
-              )}
+                  <p className="text-blue-600 text-center">No changes made yet</p>
+                )}
             </div>
-            
+
             {/* Action buttons */}
             <div className="flex gap-2 justify-end">
               <Button variant="outline" onClick={handleCancel} className="border-2 border-purple-200 hover:border-purple-500">
@@ -539,7 +539,7 @@ const FacultyDetailView = () => {
               Achievement counts are automatically updated from the database. Use the "Refresh Counts" button to get the latest data.
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {achievementCategories.map((category, index) => (
               <Card key={index} className="shadow-xl hover:shadow-2xl transition-all duration-300 border border-purple-200 dark:border-purple-700 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm">
@@ -563,11 +563,10 @@ const FacultyDetailView = () => {
                               min="0"
                               value={editedFaculty[item.key] || 0}
                               onChange={(e) => updateField(item.key, parseInt(e.target.value) || 0)}
-                              className={`w-20 text-right border-2 focus:border-purple-500 ${
-                                editedFaculty[item.key] !== faculty[item.key] 
-                                  ? 'border-green-500 bg-green-50' 
-                                  : 'border-purple-200'
-                              }`}
+                              className={`w-20 text-right border-2 focus:border-purple-500 ${editedFaculty[item.key] !== faculty[item.key]
+                                ? 'border-green-500 bg-green-50'
+                                : 'border-purple-200'
+                                }`}
                             />
                           ) : (
                             <Badge variant="secondary" className="text-lg font-semibold bg-gradient-to-r from-purple-500 to-pink-500 text-white">
@@ -575,7 +574,7 @@ const FacultyDetailView = () => {
                             </Badge>
                           )}
                         </div>
-                        
+
                         {/* PDF Upload Section - Only show when editing */}
                         {isEditing && (
                           <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg p-3 border border-purple-200 dark:border-purple-700">
@@ -583,7 +582,7 @@ const FacultyDetailView = () => {
                               <FileText className="w-4 h-4 text-purple-600" />
                               <span className="text-sm font-medium text-purple-700 dark:text-purple-300">Upload PDF for Achievement</span>
                             </div>
-                            
+
                             {/* PDF File Input */}
                             <div className="space-y-3">
                               <div className="flex items-center gap-2">
@@ -604,7 +603,7 @@ const FacultyDetailView = () => {
                                   </Button>
                                 )}
                               </div>
-                              
+
                               {/* Selected PDF Display */}
                               {pdfSubmissions[`${category.key}_${item.key}`] && (
                                 <div className="bg-white dark:bg-gray-700 rounded-lg p-3 border border-green-200 dark:border-green-700">
@@ -615,18 +614,37 @@ const FacultyDetailView = () => {
                                       ({(pdfSubmissions[`${category.key}_${item.key}`].size / 1024 / 1024).toFixed(2)} MB)
                                     </span>
                                   </div>
-                                  
-                                  {/* Title and Description Inputs */}
+                                  {/* Title, Description, and Quantity Inputs */}
                                   <div className="mt-3 space-y-2">
-                                    <Input
-                                      placeholder="Achievement Title"
-                                      value={submissionTitles[`${category.key}_${item.key}`] || ''}
-                                      onChange={(e) => setSubmissionTitles(prev => ({
-                                        ...prev,
-                                        [`${category.key}_${item.key}`]: e.target.value
-                                      }))}
-                                      className="border-2 border-green-200 focus:border-green-500"
-                                    />
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+                                      <div className="md:col-span-3">
+                                        <Label className="text-xs text-green-700 mb-1 block">Achievement Title</Label>
+                                        <Input
+                                          placeholder="Achievement Title"
+                                          value={submissionTitles[`${category.key}_${item.key}`] || ''}
+                                          onChange={(e) => setSubmissionTitles(prev => ({
+                                            ...prev,
+                                            [`${category.key}_${item.key}`]: e.target.value
+                                          }))}
+                                          className="border-2 border-green-200 focus:border-green-500"
+                                        />
+                                      </div>
+                                      <div>
+                                        <Label className="text-xs text-green-700 mb-1 block">Quantity</Label>
+                                        <Input
+                                          type="number"
+                                          min="1"
+                                          placeholder="Inc"
+                                          value={editedFaculty[`${item.key}_increase`] || '1'}
+                                          onChange={(e) => setEditedFaculty(prev => ({
+                                            ...prev,
+                                            [`${item.key}_increase`]: e.target.value
+                                          }))}
+                                          className="border-2 border-green-200 focus:border-green-500"
+                                        />
+                                      </div>
+                                    </div>
+                                    <Label className="text-xs text-green-700 mb-1 block">Description</Label>
                                     <Textarea
                                       placeholder="Brief description of the achievement"
                                       value={submissionDescriptions[`${category.key}_${item.key}`] || ''}
@@ -637,7 +655,7 @@ const FacultyDetailView = () => {
                                       className="border-2 border-green-200 focus:border-green-500 min-h-[60px]"
                                     />
                                   </div>
-                                  
+
                                   {/* Submit Button */}
                                   <Button
                                     onClick={() => handlePdfSubmit(category.key, item.key)}

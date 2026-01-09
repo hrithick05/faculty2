@@ -9,17 +9,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from "@/hooks/use-toast";
 import { getCookie } from "@/utils/cookies";
 import { useNavigate } from 'react-router-dom';
-import { 
-  CheckCircle, 
-  XCircle, 
-  FileText, 
-  User, 
-  Clock, 
-  Award, 
-  Eye, 
-  Download, 
-  Filter, 
-  Search, 
+import {
+  CheckCircle,
+  XCircle,
+  FileText,
+  User,
+  Clock,
+  Award,
+  Eye,
+  Download,
+  Filter,
+  Search,
   RefreshCw,
   Trash2,
   ArrowLeft,
@@ -71,24 +71,24 @@ const HODReviewPanel = () => {
     try {
       const localFaculty = localStorage.getItem('loggedInFaculty');
       const cookieFaculty = getCookie('loggedInFaculty');
-      
+
       console.log('🔍 Getting current user in HODReviewPanel:');
       console.log('  - localStorage faculty:', localFaculty);
       console.log('  - cookie faculty:', cookieFaculty);
-      
+
       const faculty = localFaculty ? JSON.parse(localFaculty) : cookieFaculty;
-      
+
       if (!faculty) {
         console.log('❌ No faculty data found in storage or cookies');
         return null;
       }
-      
+
       console.log('✅ Current user:', faculty);
       console.log('  - ID:', faculty.id);
       console.log('  - Name:', faculty.name);
       console.log('  - Designation:', faculty.designation);
       console.log('  - Department:', faculty.department);
-      
+
       return faculty;
     } catch (error) {
       console.error('❌ Error getting current user:', error);
@@ -100,18 +100,18 @@ const HODReviewPanel = () => {
   const isCurrentUserHOD = () => {
     const user = getCurrentUser();
     if (!user) return false;
-    
+
     const designation = user.designation?.toLowerCase() || '';
-    const isHOD = designation.includes('hod') || 
-                   designation.includes('head') || 
-                   designation.includes('chair') ||
-                   designation.includes('professor') ||
-                   designation.includes('director');
-    
+    const isHOD = designation.includes('hod') ||
+      designation.includes('head') ||
+      designation.includes('chair') ||
+      designation.includes('professor') ||
+      designation.includes('director');
+
     console.log('🔍 HOD check for user:', user.name);
     console.log('  - Designation:', designation);
     console.log('  - Is HOD:', isHOD);
-    
+
     return isHOD;
   };
 
@@ -131,7 +131,7 @@ const HODReviewPanel = () => {
       }, 2000);
       return;
     }
-    
+
     if (!isCurrentUserHOD()) {
       console.log('❌ User is not HOD, redirecting to dashboard');
       toast({
@@ -145,7 +145,7 @@ const HODReviewPanel = () => {
       }, 2000);
       return;
     }
-    
+
     console.log('✅ User authenticated and authorized as HOD');
     // Start fetching data
     fetchSubmissions();
@@ -159,57 +159,57 @@ const HODReviewPanel = () => {
       } else {
         setLoading(true);
       }
-      
+
       console.log('🔍 Fetching submissions from backend...');
       const apiUrl = import.meta.env.VITE_API_URL || 'https://faculty2.onrender.com';
       const response = await fetch(`${apiUrl}/api/achievements/all`);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
-      
+
       const data = await response.json();
       console.log('📋 Backend response:', data);
-      
+
       if (!data.success) {
         throw new Error(data.message || 'Backend returned error');
       }
-      
+
       // Get all submissions without filtering
       const allSubmissions = data.data || [];
       console.log(`📊 Found ${allSubmissions.length} total submissions`);
-      
+
       // Show all submissions that have basic data
-      const validSubmissions = allSubmissions.filter(submission => 
-        submission.faculty_id && 
+      const validSubmissions = allSubmissions.filter(submission =>
+        submission.faculty_id &&
         submission.faculty_name &&
         submission.status
       );
-      
+
       console.log(`✅ Valid submissions: ${validSubmissions.length}`);
       console.log('📋 Submissions data:', validSubmissions);
-      
+
       // Log the order of submissions to verify they're in the right order
       console.log('📅 Submission order check (should be newest first):');
       validSubmissions.forEach((submission, index) => {
         console.log(`  ${index + 1}. ID: ${submission.id}, Title: ${submission.title}, Submitted: ${submission.submitted_at}, Status: ${submission.status}`);
       });
-      
+
       // Fetch updated achievement counts for approved submissions
       const submissionsWithCounts = await fetchFacultyAchievementCounts(validSubmissions);
-      
+
       // IMPORTANT: Don't re-sort here! The backend already returns them in the correct order
       // The backend orders by submitted_at DESC (newest first), so preserve that order
       const finalSubmissions = submissionsWithCounts;
-      
+
       console.log('🎯 Final submissions order (preserving backend order):');
       finalSubmissions.forEach((submission, index) => {
         console.log(`  ${index + 1}. ID: ${submission.id}, Title: ${submission.title}, Submitted: ${submission.submitted_at}, Status: ${submission.status}`);
       });
-      
+
       setSubmissions(finalSubmissions);
       setFilteredSubmissions(finalSubmissions);
-      
+
       // Check for new submissions
       if (lastSubmissionCount > 0 && finalSubmissions.length > lastSubmissionCount) {
         const newCount = finalSubmissions.length - lastSubmissionCount;
@@ -219,12 +219,12 @@ const HODReviewPanel = () => {
           description: `${newCount} new submission(s) have been added.`,
         });
       }
-      
+
       setLastSubmissionCount(finalSubmissions.length);
-      
+
       // Verify the order is correct
       verifySubmissionOrder();
-      
+
       if (isRefresh) {
         toast({
           title: "Data Refreshed",
@@ -263,22 +263,22 @@ const HODReviewPanel = () => {
   // Manual sort function to debug ordering
   const manualSortSubmissions = () => {
     console.log('🔧 Manually sorting submissions...');
-    
+
     const sorted = [...submissions].sort((a, b) => {
       const dateA = new Date(a.submitted_at);
       const dateB = new Date(b.submitted_at);
       console.log(`  Comparing: ${a.title} (${dateA}) vs ${b.title} (${dateB})`);
       return dateB - dateA; // Newest first
     });
-    
+
     console.log('📊 Manual sort result:');
     sorted.forEach((sub, idx) => {
       console.log(`  ${idx + 1}. ID: ${sub.id}, Title: ${sub.title}, Submitted: ${sub.submitted_at}`);
     });
-    
+
     setSubmissions(sorted);
     setFilteredSubmissions(sorted);
-    
+
     toast({
       title: "Manual Sort Applied",
       description: "Submissions have been manually sorted by date",
@@ -292,7 +292,7 @@ const HODReviewPanel = () => {
       const rawDate = sub.submitted_at;
       const parsedDate = new Date(rawDate);
       const isValid = !isNaN(parsedDate.getTime());
-      
+
       console.log(`  ${idx + 1}. ID: ${sub.id}, Raw: "${rawDate}", Parsed: ${parsedDate}, Valid: ${isValid}`);
     });
   };
@@ -300,17 +300,17 @@ const HODReviewPanel = () => {
   // Verify submission order
   const verifySubmissionOrder = () => {
     if (submissions.length < 2) return true;
-    
+
     for (let i = 0; i < submissions.length - 1; i++) {
       const current = new Date(submissions[i].submitted_at);
       const next = new Date(submissions[i + 1].submitted_at);
-      
+
       if (current < next) {
         console.error(`❌ Order issue: Submission ${i + 1} (${submissions[i].title}) is newer than submission ${i + 2} (${submissions[i + 1].title})`);
         return false;
       }
     }
-    
+
     console.log('✅ All submissions are in correct order (newest first)');
     return true;
   };
@@ -321,41 +321,41 @@ const HODReviewPanel = () => {
       // Get unique faculty IDs from approved submissions
       const approvedSubmissions = submissions.filter(s => s.status === 'approved');
       const facultyIds = [...new Set(approvedSubmissions.map(s => s.faculty_id))];
-      
+
       if (facultyIds.length === 0) return submissions;
-      
+
       console.log('🔍 Fetching updated achievement counts for faculty:', facultyIds);
-      
+
       // Fetch faculty data from Supabase
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://yfcukflinfinmjvllwin.supabase.co';
       const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmY3VrZmxpbmZpbm1qdmxsd2luIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzNjYzNzIsImV4cCI6MjA2OTk0MjM3Mn0.JtFF_xnwjHtb8WnzbWxAJS5gNyv0u_WI7NgPBGoDJE4';
-      
+
       const { createClient } = await import('@supabase/supabase-js');
       const supabase = createClient(supabaseUrl, supabaseAnonKey);
-      
+
       const { data: facultyData, error } = await supabase
         .from('faculty')
         .select('id, journalpublications, patents, studentprojects, rdproposalssangsation, rdproposalssubmition, rdfunding, journalscoauthor, studentpublications, bookpublications, onlinecertifications, fdpworks, fdpworps, industrycollabs, otheractivities')
         .in('id', facultyIds);
-      
+
       if (error) {
         console.error('❌ Error fetching faculty data:', error);
         return submissions;
       }
-      
+
       // Create a map of faculty ID to achievement counts
       const facultyCounts = {};
       facultyData?.forEach(faculty => {
         facultyCounts[faculty.id] = faculty;
       });
-      
+
       // Update submissions with current achievement counts while preserving order
       const updatedSubmissions = submissions.map(submission => {
         if (submission.status === 'approved' && facultyCounts[submission.faculty_id]) {
           const faculty = facultyCounts[submission.faculty_id];
           const achievementType = submission.achievement_type;
           const currentCount = faculty[achievementType] || 0;
-          
+
           return {
             ...submission,
             current_achievement_count: currentCount,
@@ -364,10 +364,10 @@ const HODReviewPanel = () => {
         }
         return submission;
       });
-      
+
       console.log('✅ Updated submissions with current achievement counts (order preserved)');
       return updatedSubmissions;
-      
+
     } catch (error) {
       console.error('❌ Error fetching faculty achievement counts:', error);
       return submissions;
@@ -377,7 +377,7 @@ const HODReviewPanel = () => {
   // Filter submissions based on search and status
   useEffect(() => {
     let filtered = submissions;
-    
+
     if (searchTerm) {
       filtered = filtered.filter(submission =>
         submission.faculty_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -386,11 +386,11 @@ const HODReviewPanel = () => {
         submission.category?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    
+
     if (statusFilter !== 'all') {
       filtered = filtered.filter(submission => submission.status === statusFilter);
     }
-    
+
     setFilteredSubmissions(filtered);
   }, [submissions, searchTerm, statusFilter]);
 
@@ -398,7 +398,7 @@ const HODReviewPanel = () => {
   const handleReview = async (submissionId, action, reason) => {
     try {
       console.log('🔍 Reviewing submission:', submissionId, 'Action:', action);
-      
+
       const apiUrl = import.meta.env.VITE_API_URL || 'https://faculty2.onrender.com';
       const response = await fetch(`${apiUrl}/api/achievements/review`, {
         method: 'POST',
@@ -419,7 +419,7 @@ const HODReviewPanel = () => {
       }
 
       const result = await response.json();
-      
+
       // Show success message with achievement count update info
       if (action === 'approve') {
         toast({
@@ -435,13 +435,13 @@ const HODReviewPanel = () => {
 
       // Refresh the submissions list
       await fetchSubmissions(true);
-      
+
       // Close dialog
       setReviewDialog(false);
       setSelectedSubmission(null);
       setReviewAction('');
       setReviewReason('');
-      
+
     } catch (error) {
       console.error('❌ Review error:', error);
       toast({
@@ -495,7 +495,7 @@ const HODReviewPanel = () => {
       }
 
       const result = await response.json();
-      
+
       toast({
         title: "Faculty Deleted Successfully",
         description: result.message || "Faculty details have been removed from the system.",
@@ -503,12 +503,12 @@ const HODReviewPanel = () => {
 
       // Refresh submissions to reflect the deletion
       await fetchSubmissions(true);
-      
+
       // Close dialog
       setDeleteDialog(false);
       setFacultyToDelete(null);
       setDeleteConfirmation('');
-      
+
     } catch (error) {
       console.error('❌ Delete faculty error:', error);
       toast({
@@ -526,7 +526,7 @@ const HODReviewPanel = () => {
       approved: 'default',
       rejected: 'destructive'
     };
-    
+
     return (
       <Badge variant={variants[status] || 'secondary'}>
         {status?.charAt(0)?.toUpperCase() + status?.slice(1) || 'Unknown'}
@@ -541,7 +541,7 @@ const HODReviewPanel = () => {
       const date = new Date(dateString);
       // Convert to IST (UTC+5:30)
       const istDate = new Date(date.getTime() + (5.5 * 60 * 60 * 1000));
-      
+
       return istDate.toLocaleDateString('en-IN', {
         year: 'numeric',
         month: 'short',
@@ -562,7 +562,7 @@ const HODReviewPanel = () => {
       const date = new Date(dateString);
       // Convert to IST (UTC+5:30)
       const istDate = new Date(date.getTime() + (5.5 * 60 * 60 * 1000));
-      
+
       const options = {
         day: '2-digit',
         month: 'short',
@@ -571,7 +571,7 @@ const HODReviewPanel = () => {
         minute: '2-digit',
         timeZone: 'Asia/Kolkata'
       };
-      
+
       return istDate.toLocaleDateString('en-IN', options) + ' IST';
     } catch (error) {
       return 'Invalid Date';
@@ -583,18 +583,18 @@ const HODReviewPanel = () => {
     try {
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://yfcukflinfinmjvllwin.supabase.co';
       const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmY3VrZmxpbmZpbm1qdmxsd2luIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzNjYzNzIsImV4cCI6MjA2OTk0MjM3Mn0.JtFF_xnwjHtb8WnzbWxAJS5gNyv0u_WI7NgPBGoDJE4';
-      
+
       const { createClient } = await import('@supabase/supabase-js');
       const supabase = createClient(supabaseUrl, supabaseAnonKey);
-      
+
       const { data, error } = await supabase
         .from('faculty')
         .select('id, name, department, designation')
         .eq('department', 'Computer Science')
         .order('name', { ascending: true });
-      
+
       if (error) throw error;
-      
+
       setFacultyList(data || []);
       return data || [];
     } catch (error) {
@@ -676,7 +676,7 @@ const HODReviewPanel = () => {
       }
 
       const result = await response.json();
-      
+
       toast({
         title: "Points Awarded Successfully! ✅",
         description: `Micro-level contribution points have been added to ${result.facultyName || selectedFacultyForPoints}'s profile.`,
@@ -720,13 +720,13 @@ const HODReviewPanel = () => {
   // Load submissions on component mount
   useEffect(() => {
     fetchSubmissions();
-    
+
     // Auto-refresh every 2 minutes to catch new submissions
     const autoRefreshInterval = setInterval(() => {
       console.log('🔄 Auto-refreshing submissions...');
       fetchSubmissions(true);
     }, 2 * 60 * 1000); // 2 minutes
-    
+
     return () => clearInterval(autoRefreshInterval);
   }, []);
 
@@ -743,25 +743,13 @@ const HODReviewPanel = () => {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      {/* Debug Section - Only show in development */}
-      {import.meta.env.DEV && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-          <h3 className="text-sm font-medium text-yellow-800 mb-2">🔍 Debug Info (Development Only)</h3>
-          <div className="text-xs text-yellow-700 space-y-1">
-            <div>Current User: {getCurrentUser()?.name || 'None'}</div>
-            <div>Designation: {getCurrentUser()?.designation || 'None'}</div>
-            <div>Is HOD: {isCurrentUserHOD() ? 'Yes' : 'No'}</div>
-            <div>localStorage: {localStorage.getItem('loggedInFaculty') ? 'Present' : 'Empty'}</div>
-            <div>Cookie: {getCookie('loggedInFaculty') ? 'Present' : 'Empty'}</div>
-          </div>
-        </div>
-      )}
+
 
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button 
-            onClick={() => navigate('/dashboard')} 
+          <Button
+            onClick={() => navigate('/dashboard')}
             variant="outline"
             className="flex items-center gap-2"
           >
@@ -795,36 +783,36 @@ const HODReviewPanel = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button 
+          <Button
             onClick={openAwardPointsDialog}
             className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600"
           >
             <Star className="w-4 h-4 mr-2" />
             Award Micro-Level Points
           </Button>
-          <Button 
-            onClick={() => fetchSubmissions(true)} 
+          <Button
+            onClick={() => fetchSubmissions(true)}
             disabled={refreshing}
             variant="outline"
           >
             <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
-          <Button 
+          <Button
             onClick={() => {
               console.log('🔄 Force refreshing submissions...');
               setSubmissions([]);
               setFilteredSubmissions([]);
               // Clear any cached data and fetch fresh
               setTimeout(() => fetchSubmissions(true), 100);
-            }} 
+            }}
             disabled={refreshing}
             variant="outline"
           >
             <RefreshCw className="w-4 h-4 mr-2" />
             Force Refresh
           </Button>
-          <Button 
+          <Button
             onClick={() => {
               console.log('🧹 Clearing cache and refreshing...');
               setSubmissions([]);
@@ -833,7 +821,7 @@ const HODReviewPanel = () => {
               setStatusFilter('all');
               // Force a complete refresh
               setTimeout(() => fetchSubmissions(true), 100);
-            }} 
+            }}
             disabled={refreshing}
             variant="destructive"
           >
@@ -885,8 +873,8 @@ const HODReviewPanel = () => {
                   <p className="text-gray-600">
                     Faculty members haven't submitted any achievements for review.
                   </p>
-                  <Button 
-                    onClick={() => fetchSubmissions(true)} 
+                  <Button
+                    onClick={() => fetchSubmissions(true)}
                     className="mt-4"
                     variant="outline"
                   >
@@ -934,7 +922,7 @@ const HODReviewPanel = () => {
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* PDF Info */}
                     <div className="flex items-center gap-3 flex-1">
                       <div className="p-2 bg-blue-100 rounded-lg">
@@ -951,6 +939,9 @@ const HODReviewPanel = () => {
                           <span className="text-xs text-gray-500">
                             Category: {submission.category} • Type: {submission.achievement_type}
                           </span>
+                          <Badge variant="outline" className="ml-2 text-[10px] py-0 border-blue-200 text-blue-700 bg-blue-50">
+                            +{submission.requested_increase || 1}
+                          </Badge>
                           {submission.pdf_url && (
                             <>
                               <Button
@@ -1005,7 +996,7 @@ const HODReviewPanel = () => {
                           {formatDateIST(submission.submitted_at)}
                         </div>
                       </div>
-                      
+
                       {submission.status === 'pending' && (
                         <div className="flex gap-2">
                           <Button
@@ -1026,7 +1017,7 @@ const HODReviewPanel = () => {
                           </Button>
                         </div>
                       )}
-                      
+
                       {/* Reset Faculty Performance Data Button - Visible to all users for testing */}
                       <Button
                         size="sm"
@@ -1054,7 +1045,7 @@ const HODReviewPanel = () => {
               {reviewAction === 'approve' ? 'Approve' : 'Reject'} Submission
             </DialogTitle>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             <div>
               <h4 className="font-medium mb-2">Submission Details:</h4>
@@ -1076,7 +1067,7 @@ const HODReviewPanel = () => {
                 )}
               </div>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium mb-2">
                 {reviewAction === 'approve' ? 'Approval' : 'Rejection'} Reason (Optional):
@@ -1088,7 +1079,7 @@ const HODReviewPanel = () => {
                 rows={3}
               />
             </div>
-            
+
             <div className="flex gap-3 justify-end">
               <Button
                 variant="outline"
@@ -1115,7 +1106,7 @@ const HODReviewPanel = () => {
               Award Micro-Level Contribution Points (40%)
             </DialogTitle>
           </DialogHeader>
-          
+
           <div className="space-y-6">
             {/* Faculty Selection */}
             <div>
@@ -1147,7 +1138,7 @@ const HODReviewPanel = () => {
                   type="number"
                   min="0"
                   value={microLevelPoints.reducing_fee_defaulters || 0}
-                  onChange={(e) => setMicroLevelPoints({...microLevelPoints, reducing_fee_defaulters: parseInt(e.target.value) || 0})}
+                  onChange={(e) => setMicroLevelPoints({ ...microLevelPoints, reducing_fee_defaulters: parseInt(e.target.value) || 0 })}
                   placeholder="Enter points"
                 />
               </div>
@@ -1161,7 +1152,7 @@ const HODReviewPanel = () => {
                   type="number"
                   min="0"
                   value={microLevelPoints.reducing_dress_code_defaulters || 0}
-                  onChange={(e) => setMicroLevelPoints({...microLevelPoints, reducing_dress_code_defaulters: parseInt(e.target.value) || 0})}
+                  onChange={(e) => setMicroLevelPoints({ ...microLevelPoints, reducing_dress_code_defaulters: parseInt(e.target.value) || 0 })}
                   placeholder="Enter points"
                 />
               </div>
@@ -1175,7 +1166,7 @@ const HODReviewPanel = () => {
                   type="number"
                   min="0"
                   value={microLevelPoints.timely_completion_work || 0}
-                  onChange={(e) => setMicroLevelPoints({...microLevelPoints, timely_completion_work: parseInt(e.target.value) || 0})}
+                  onChange={(e) => setMicroLevelPoints({ ...microLevelPoints, timely_completion_work: parseInt(e.target.value) || 0 })}
                   placeholder="Enter points"
                 />
               </div>
@@ -1189,7 +1180,7 @@ const HODReviewPanel = () => {
                   type="number"
                   min="0"
                   value={microLevelPoints.punctuality_class_lab || 0}
-                  onChange={(e) => setMicroLevelPoints({...microLevelPoints, punctuality_class_lab: parseInt(e.target.value) || 0})}
+                  onChange={(e) => setMicroLevelPoints({ ...microLevelPoints, punctuality_class_lab: parseInt(e.target.value) || 0 })}
                   placeholder="Enter points"
                 />
               </div>
@@ -1203,7 +1194,7 @@ const HODReviewPanel = () => {
                   type="number"
                   min="0"
                   value={microLevelPoints.classroom_teaching || 0}
-                  onChange={(e) => setMicroLevelPoints({...microLevelPoints, classroom_teaching: parseInt(e.target.value) || 0})}
+                  onChange={(e) => setMicroLevelPoints({ ...microLevelPoints, classroom_teaching: parseInt(e.target.value) || 0 })}
                   placeholder="Enter points"
                 />
               </div>
@@ -1217,7 +1208,7 @@ const HODReviewPanel = () => {
                   type="number"
                   min="0"
                   value={microLevelPoints.volunteering_behavior || 0}
-                  onChange={(e) => setMicroLevelPoints({...microLevelPoints, volunteering_behavior: parseInt(e.target.value) || 0})}
+                  onChange={(e) => setMicroLevelPoints({ ...microLevelPoints, volunteering_behavior: parseInt(e.target.value) || 0 })}
                   placeholder="Enter points"
                 />
               </div>
@@ -1231,7 +1222,7 @@ const HODReviewPanel = () => {
                   type="number"
                   min="0"
                   value={microLevelPoints.timely_mentor_report || 0}
-                  onChange={(e) => setMicroLevelPoints({...microLevelPoints, timely_mentor_report: parseInt(e.target.value) || 0})}
+                  onChange={(e) => setMicroLevelPoints({ ...microLevelPoints, timely_mentor_report: parseInt(e.target.value) || 0 })}
                   placeholder="Enter points"
                 />
               </div>
@@ -1245,7 +1236,7 @@ const HODReviewPanel = () => {
                   type="number"
                   min="0"
                   value={microLevelPoints.timely_course_file || 0}
-                  onChange={(e) => setMicroLevelPoints({...microLevelPoints, timely_course_file: parseInt(e.target.value) || 0})}
+                  onChange={(e) => setMicroLevelPoints({ ...microLevelPoints, timely_course_file: parseInt(e.target.value) || 0 })}
                   placeholder="Enter points"
                 />
               </div>
@@ -1259,7 +1250,7 @@ const HODReviewPanel = () => {
                   type="number"
                   min="0"
                   value={microLevelPoints.microteaching || 0}
-                  onChange={(e) => setMicroLevelPoints({...microLevelPoints, microteaching: parseInt(e.target.value) || 0})}
+                  onChange={(e) => setMicroLevelPoints({ ...microLevelPoints, microteaching: parseInt(e.target.value) || 0 })}
                   placeholder="Enter points"
                 />
               </div>
@@ -1273,7 +1264,7 @@ const HODReviewPanel = () => {
                   type="number"
                   min="0"
                   value={microLevelPoints.floor_duty || 0}
-                  onChange={(e) => setMicroLevelPoints({...microLevelPoints, floor_duty: parseInt(e.target.value) || 0})}
+                  onChange={(e) => setMicroLevelPoints({ ...microLevelPoints, floor_duty: parseInt(e.target.value) || 0 })}
                   placeholder="Enter points"
                 />
               </div>
@@ -1287,7 +1278,7 @@ const HODReviewPanel = () => {
                   type="number"
                   min="0"
                   value={microLevelPoints.innovative_lab_conduct || 0}
-                  onChange={(e) => setMicroLevelPoints({...microLevelPoints, innovative_lab_conduct: parseInt(e.target.value) || 0})}
+                  onChange={(e) => setMicroLevelPoints({ ...microLevelPoints, innovative_lab_conduct: parseInt(e.target.value) || 0 })}
                   placeholder="Enter points"
                 />
               </div>
@@ -1301,7 +1292,7 @@ const HODReviewPanel = () => {
                   type="number"
                   min="0"
                   value={microLevelPoints.qp_setting_blooms || 0}
-                  onChange={(e) => setMicroLevelPoints({...microLevelPoints, qp_setting_blooms: parseInt(e.target.value) || 0})}
+                  onChange={(e) => setMicroLevelPoints({ ...microLevelPoints, qp_setting_blooms: parseInt(e.target.value) || 0 })}
                   placeholder="Enter points"
                 />
               </div>
@@ -1315,7 +1306,7 @@ const HODReviewPanel = () => {
                   type="number"
                   min="0"
                   value={microLevelPoints.nba_contribution || 0}
-                  onChange={(e) => setMicroLevelPoints({...microLevelPoints, nba_contribution: parseInt(e.target.value) || 0})}
+                  onChange={(e) => setMicroLevelPoints({ ...microLevelPoints, nba_contribution: parseInt(e.target.value) || 0 })}
                   placeholder="Enter points"
                 />
               </div>
@@ -1329,7 +1320,7 @@ const HODReviewPanel = () => {
                   type="number"
                   min="0"
                   value={microLevelPoints.placement_contribution || 0}
-                  onChange={(e) => setMicroLevelPoints({...microLevelPoints, placement_contribution: parseInt(e.target.value) || 0})}
+                  onChange={(e) => setMicroLevelPoints({ ...microLevelPoints, placement_contribution: parseInt(e.target.value) || 0 })}
                   placeholder="Enter points"
                 />
               </div>
@@ -1379,10 +1370,10 @@ const HODReviewPanel = () => {
       {/* Delete Faculty Details Dialog */}
       <Dialog open={deleteDialog} onOpenChange={setDeleteDialog}>
         <DialogContent>
-                  <DialogHeader>
-          <DialogTitle className="text-red-600">Reset Faculty Performance Data</DialogTitle>
-        </DialogHeader>
-          
+          <DialogHeader>
+            <DialogTitle className="text-red-600">Reset Faculty Performance Data</DialogTitle>
+          </DialogHeader>
+
           <div className="space-y-4">
             <div className="bg-red-50 p-4 rounded-lg border border-red-200">
               <h4 className="font-medium text-red-800 mb-2">⚠️ Warning: This action cannot be undone!</h4>
@@ -1402,7 +1393,7 @@ const HODReviewPanel = () => {
                 All achievement counts, publications, and performance data will be reset to zero/null.
               </p>
             </div>
-            
+
             <div className="bg-gray-50 p-3 rounded-lg">
               <h4 className="font-medium mb-2">Faculty to Delete:</h4>
               <div className="text-sm">
@@ -1411,7 +1402,7 @@ const HODReviewPanel = () => {
                 <p><strong>Department:</strong> {facultyToDelete?.department}</p>
               </div>
             </div>
-            
+
             <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
               <h4 className="font-medium mb-2 text-blue-800">HOD Performing Action:</h4>
               <div className="text-sm text-blue-700">
@@ -1421,7 +1412,7 @@ const HODReviewPanel = () => {
                 <p><strong>Department:</strong> {getCurrentUser()?.department}</p>
               </div>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium mb-2 text-red-600">
                 Type exactly "DELETE_FACULTY_DETAILS" to confirm:
@@ -1433,7 +1424,7 @@ const HODReviewPanel = () => {
                 className="border-red-200 focus:border-red-500"
               />
             </div>
-            
+
             <div className="flex gap-3 justify-end">
               <Button
                 variant="outline"
