@@ -1,0 +1,31 @@
+services:
+  # Backend API Service
+  - type: web
+    name: faculty-dashboard-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm run backend:start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # PORT is automatically set by Render, no need to specify
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_SERVICE_KEY
+        sync: false
+
+  # Frontend Static Site
+  - type: web
+    name: t-dashboard-frontend
+    env: static
+    plan: free
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
+      - key: VITE_API_URL
+        value: https://t-dashboard-backend.onrender.com
