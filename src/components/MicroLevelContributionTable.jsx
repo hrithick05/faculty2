@@ -184,7 +184,8 @@ const MicroLevelContributionTable = ({
             console.log('🎯 Awarding points to:', selectedFaculty.id);
             console.log('📊 Points:', awardPoints);
 
-            const response = await fetch('http://localhost:5000/api/faculty/award-micro-level-points', {
+            const apiUrl = import.meta.env.VITE_API_URL || 'https://faculty2.onrender.com';
+            const response = await fetch(`${apiUrl}/api/faculty/award-micro-level-points`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
